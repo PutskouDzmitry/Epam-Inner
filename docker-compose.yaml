@@ -1,0 +1,46 @@
+version: '3.4'
+
+services:
+  dbup:
+    image: dbup:latest
+    networks:
+      - ${NETWORK}
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=postgres
+    container_name: dbup
+    ports:
+    - 5433:5432
+  db:
+    image: db:latest
+    networks:
+      - ${NETWORK}
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=postgres
+    ports:
+      - 5431:5432
+    container_name: db
+  server:
+    image: ${SERVER_IMAGE}
+    ports:
+      - ${SERVER_OUT_PORT}:${SERVER_INNER_PORT}
+    container_name: {SERVER_CONTAINER_NAME}
+    environment:
+      - DB_USERS_HOST_POSTGRES=${DB_USERS_HOST_POSTGRES}
+      - DB_USERS_PORT=${DB_USERS_PORT}
+      - DB_USERS_USER=${DB_USERS_USER}
+      - DB_USERS_DBNAME=${DB_USERS_DBNAME}
+      - DB_USERS_PASSWORD=${DB_USERS_PASSWORD}
+      - DB_USERS_SSL=${DB_USERS_SSL}
+    depends_on:
+      - ${DEPENDS_POSTGRES}
+    networks:
+      - ${NETWORK}
+
+networks:
+  network:
+    name: ${NETWORK}
+
