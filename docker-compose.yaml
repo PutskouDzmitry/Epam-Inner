@@ -1,0 +1,49 @@
+version: '3.4'
+
+services:
+  dbup:
+    image: ${TIMESCALE_IMAGE}
+    networks:
+      - ${NETWORK_NAME}
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    container_name: ${TIMESCALE_CONTAINER_NAME}
+    ports:
+    - ${TIMESCALE_OUT_PORT}:${TIMESCALE_INNER_PORT}
+  db:
+    image: ${POSTGRES_IMAGE}
+    networks:
+      - ${NETWORK_NAME}
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - ${POSTGRES_OUT_PORT}:${POSTGRES_INNER_PORT}
+    container_name: ${POSTGRES_CONTAINER_NAME}
+    depends_on:
+      - ${DEPENDS_TIMESCALE}
+  server:
+    image: ${SERVER_IMAGE}
+    ports:
+      - ${SERVER_OUT_PORT}:${SERVER_INNER_PORT}
+    container_name: ${SERVER_CONTAINER_NAME}
+    environment:
+      - CHECK=${CHECK}
+      - DB_USERS_HOST_POSTGRES=${DB_USERS_HOST_POSTGRES}
+      - DB_USERS_PORT=${DB_USERS_PORT}
+      - DB_USERS_USER=${DB_USERS_USER}
+      - DB_USERS_DBNAME=${DB_USERS_DBNAME}
+      - DB_USERS_PASSWORD=${DB_USERS_PASSWORD}
+      - DB_USERS_SSL=${DB_USERS_SSL}
+    depends_on:
+      - ${DEPENDS_POSTGRES}
+    networks:
+      - ${NETWORK_NAME}
+
+networks:
+  network:
+    name: ${NETWORK_NAME}
+
